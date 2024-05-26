@@ -17,12 +17,12 @@ namespace GuardadordeXML
         private void button1_Click(object sender, EventArgs e)
         {
             // Ruta del archivo XML
-            string xmlPath = @"C:\Users\diego\Downloads\MisXMLTimbrados\CFDI2.xml";
+            string xmlPath = @"C:\Users\diego\Downloads\Facturas\CFDI.xml";
 
             // Verificar si el archivo XML existe
             if (!File.Exists(xmlPath))
             {
-                MessageBox.Show("El archivo XML no se encontró en la ubicación especificada.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("No sea ha encontrado factura XML para almacenar.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -35,23 +35,35 @@ namespace GuardadordeXML
             // Comprobar si la factura ya existe en la base de datos
             if (FacturaExiste(uuid))
             {
-                MessageBox.Show("La factura ya ha sido guardada previamente.");
+                MessageBox.Show("La factura XML ya ha se encuntra en la Base de Datos.");
             }
             else
             {
                 GuardarFacturaEnBaseDeDatos(comprobanteElement, timbreElement);
-                MessageBox.Show("Factura guardada exitosamente.");
-
+                MessageBox.Show("Factura XML guardada con éxito.");
 
                 // Mover el archivo XML procesado a la carpeta "XML_Procesados"
-                string processedXmlFolderPath = @"C:\Users\diego\Downloads\XML_Procesados";
-                string processedXmlPath = Path.Combine(processedXmlFolderPath, Path.GetFileName(xmlPath));
+                string processedXmlFolderPath = @"C:\Users\diego\Downloads\XML-Procesados";
                 Directory.CreateDirectory(processedXmlFolderPath); // Crea la carpeta si no existe
-                File.Move(xmlPath, processedXmlPath);
 
-                // Eliminar el archivo XML original
-                File.Delete(xmlPath);
+                string newFileName = GenerateUniqueFileName(processedXmlFolderPath, "FacturaXML", "xml");
+                string processedXmlPath = Path.Combine(processedXmlFolderPath, newFileName);
+
+                File.Move(xmlPath, processedXmlPath);
             }
+        }
+        // Método para generar un nombre de archivo único
+        private string GenerateUniqueFileName(string folderPath, string baseFileName, string extension)
+        {
+            int fileCount = 1;
+            string newFileName;
+            do
+            {
+                newFileName = $"{baseFileName}-[{fileCount}].{extension}";
+                fileCount++;
+            } while (File.Exists(Path.Combine(folderPath, newFileName)));
+
+            return newFileName;
         }
 
         private bool FacturaExiste(string uuid)
